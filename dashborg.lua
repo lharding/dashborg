@@ -33,7 +33,7 @@ function execTask(...)
     local r = nil
     repeat
         -- keep trying until we get something
-        r = f:read("*a") or ""
+        r = f:read("*a")
     until r
     return r
 end
