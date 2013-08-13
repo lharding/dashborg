@@ -1,3 +1,14 @@
+#!/usr/bin/lua5.1
+
+-- launch new terminal if not already in one
+-- note that this rather hackily REQUIRES something like urxvtd due to the lack of exec in Lua
+if not (arg[1] == "--noterm") then
+    os.execute("urxvtc -name dashborg -e "..arg[0].." --noterm")
+    os.exit()
+end
+
+--os.execute("sleep 0.25")
+
 require('io')
 require('curses')
 local cjson = require('cjson').new()
@@ -16,9 +27,15 @@ end
 
 function execTask(...)
     local cmd = TASK_COMMAND..' '..table.concat({...}, ' ')
-    io.stderr:write(cmd.."\n")
+--    io.stderr:write(cmd.."\n")
     local f = io.popen(cmd)
-    return f:read("*a")
+--    os.execute("sleep 0.1")
+    local r = nil
+    repeat
+        -- keep trying until we get something
+        r = f:read("*a") or ""
+    until r
+    return r
 end
 
 function dump(o)
@@ -68,7 +85,7 @@ function promptStr(prompt, default)
     curses.curs_set(0)
     curses.echo(false)
     curses.attrset(0)
-    stdscr:mvhline(bottomcurses, 0, ' ', right)
+    stdscr:mvhline(bottom, 0, ' ', right)
     return result
 end
 
@@ -92,11 +109,29 @@ function registerFollowTarget(x, y, callback)
     followTargets[#followTargets+1] = {["x"]= x, ["y"]= y, ["cb"]= callback}
 end
 
+function redraw()
+    if needRefresh then
+        followTargets = {}
+
+        local h, w = stdscr:getmaxyx()
+        -- h-1 to leave a line at the bottom for the feedback row.
+        -- Should really do this using curses windows.
+        theList:draw(stdscr, 0, 0, w, h-3)
+        stdscr:refresh()
+    end
+end
+
 function getKey(allowReread)
     local c = nil
 
     while not c do
         c = stdscr:getch()
+
+        if c == curses.KEY_RESIZE then
+            needRefresh = true
+            redraw()
+            c = nil
+        end
     end    
 
     return string.char(c)
@@ -236,7 +271,7 @@ stdscr:clear()
 
 ftLetters = "qwertyuiopasdfghjklzxcvbnm0123456789QWERTYUIOPASDFGHJKLZXCVBNM"
 
-local theList = List:new(reread())
+theList = List:new(reread())
 local c = nil
 local ch = nil
 needRefresh = true
@@ -246,15 +281,7 @@ local handler = nil
 theList.selectedIdx = 0
 
 while ch ~= 'q' do
-    if needRefresh then
-        followTargets = {}
-
-        local h, w = stdscr:getmaxyx()
-        -- h-1 to leave a line at the bottom for the feedback row.
-        -- Should really do this using curses windows.
-        theList:draw(stdscr, 0, 0, w, h-3)
-        stdscr:refresh()
-    end
+    redraw()
 
     ch = getKey()
 
@@ -319,6 +346,10 @@ while ch ~= 'q' do
         stdscr:refresh()
         local ft = letterMap[getKey()]
         if ft then ft.cb() end
+        needRefresh = true
+    elseif bubble == 'r' then
+        theList.items = reread()
+        feedback("Reloaded task list.")
         needRefresh = true
     end
 
