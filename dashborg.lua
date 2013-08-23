@@ -25,6 +25,13 @@ function trim(s)
   return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
+function ckBinding(key, binding)
+    key=key or "falsy!"
+    binding=binding or "falsy!"
+--    io.stderr:write("key="..key.." binding="..binding.."\n")
+    return true and binding:find(key)
+end
+
 function execTask(...)
     local cmd = TASK_COMMAND..' '..table.concat({...}, ' ')
 --    io.stderr:write(cmd.."\n")
@@ -269,6 +276,19 @@ stdscr = curses.stdscr()  -- it's a userdatum
 stdscr:clear()
 --stdscr:mvaddstr(15,20,'print out curses table (y/n) ? ')
 
+bindings = {}
+bindings.PREV = "k" --..string.char(curses.KEY_UP)
+bindings.NEXT = "j" --..string.char(curses.KEY_DONW)
+bindings.DELETE ="d"
+bindings.DONE = "x"
+bindings.PROCRASTINATE = "p"
+bindings.FOLLOW = "f"
+bindings.ADD = "a"
+bindings.DUE = "b"
+bindings.EDIT = "e"
+bindings.REREAD = "r"
+
+
 ftLetters = "qwertyuiopasdfghjklzxcvbnm0123456789QWERTYUIOPASDFGHJKLZXCVBNM"
 
 theList = List:new(reread())
@@ -289,25 +309,25 @@ while ch ~= 'q' do
     local item = theList:getSelectedItem()
 
     -- TODO: move a lot of these into list:handleKey
-    if bubble == 'a' then
+    if ckBinding(bubble, bindings.ADD) then
         local taskMsg = promptStr("Add task")
         local res = execTask("add", '"'..string.gsub(taskMsg, '"', '\\"')..'"')
         theList.items = reread()
         feedback("Added task: "..taskMsg, res)
         needRefresh = true
-    elseif bubble == 'd' then
+    elseif ckBinding(bubble, bindings.DELETE) then
         if promptStr("Really delete task '"..item.description.."'?")=="yes" then
             local res = execTask(item.uuid, "delete")
             feedback("Deleted task '"..item.description.."'.", res)
             theList.items = reread()
             needRefresh = true
         end
-    elseif bubble == 'x' then
+    elseif ckBinding(bubble, bindings.DONE) then
         local res = execTask(item.uuid, "done")
         feedback("'"..item.description .. "' done!", res)
         theList.items = reread()
         needRefresh = true
-    elseif bubble == 'e' then
+    elseif ckBinding(bubble, bindings.EDIT) then
         local newDesc = promptStr("Enter new description", item.description)
         if newDesc then
             local res = execTask(item.uuid, "modify", newDesc)
@@ -315,7 +335,7 @@ while ch ~= 'q' do
             theList.items = reread()
             needRefresh = true
         end
-    elseif bubble == 'p' then
+    elseif ckBinding(bubble, bindings.PROCRASTINATE) then
         local procrast = promptStr("Procrastinate by", "1day")
         if procrast then
             local res = execTask(item.uuid, "modify", "wait:"..procrast)
@@ -323,7 +343,7 @@ while ch ~= 'q' do
             theList.items = reread()
             needRefresh = true
         end
-    elseif bubble == 'b' then
+    elseif  ckBinding(bubble, bindings.DUE) then
         local due = promptStr("Set task due date")
         if due then
             local res = execTask(item.uuid, "modify", "due:"..due)
@@ -331,7 +351,7 @@ while ch ~= 'q' do
             theList.items = reread()
             needRefresh = true
         end
-    elseif bubble == 'f' then
+    elseif ckBinding(bubble, bindings.FOLLOW)  then
         local letterMap = {}
     
         curses.attrset(curses.color_pair(COLOR_SELECTION))
@@ -347,7 +367,7 @@ while ch ~= 'q' do
         local ft = letterMap[getKey()]
         if ft then ft.cb() end
         needRefresh = true
-    elseif bubble == 'r' then
+    elseif ckBinding(bubble, bindings.REREAD)  then
         theList.items = reread()
         feedback("Reloaded task list.")
         needRefresh = true
