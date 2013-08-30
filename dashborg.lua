@@ -14,7 +14,6 @@ require('curses')
 local cjson = require('cjson').new()
 
 -- MVP needs:
--- autoshow on lid close long enogh
 -- alarm or otherwise notify due stuff
 
 TASK_COMMAND='task'
@@ -30,15 +29,15 @@ function ckBinding(key, binding)
     for i, v in ipairs(binding) do
         v=v or ""
 
-        io.stderr:write("key="..key.." binding="..v.."\n")
+--        io.stderr:write("key="..key.." binding="..v.."\n")
         if type(v)=="string" and key < 255 then
-            io.stderr:write("key="..string.char(key).." binding="..v.."\n")
+--            io.stderr:write("key="..string.char(key).." binding="..v.."\n")
             if(string.char(key))=="[" then key=63 end
             if v:find(string.char(key)) then
                 return true
             end
         elseif type(v)=="number" and key==v then
-            io.stderr:write("number eq")
+--            io.stderr:write("number eq")
             return true
         end
     end
