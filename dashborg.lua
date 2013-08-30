@@ -26,10 +26,23 @@ function trim(s)
 end
 
 function ckBinding(key, binding)
-    key=key or "falsy!"
-    binding=binding or "falsy!"
---    io.stderr:write("key="..key.." binding="..binding.."\n")
-    return true and binding:find(key)
+    key=key or 0
+    for i, v in ipairs(binding) do
+        v=v or ""
+
+        io.stderr:write("key="..key.." binding="..v.."\n")
+        if type(v)=="string" and key < 255 then
+            io.stderr:write("key="..string.char(key).." binding="..v.."\n")
+            if(string.char(key))=="[" then key=63 end
+            if v:find(string.char(key)) then
+                return true
+            end
+        elseif type(v)=="number" and key==v then
+            io.stderr:write("number eq")
+            return true
+        end
+    end
+    return false
 end
 
 function execTask(...)
@@ -141,7 +154,7 @@ function getKey(allowReread)
         end
     end    
 
-    return string.char(c)
+    return c
 end
 
 -- List class --
@@ -188,10 +201,10 @@ function List:draw(window, x, y, w, h)
 end
 
 function List:handleKey(ch)
-    if ch == 'j' and self.selectedIdx < #self.items-1 then
+    if ckBinding(ch, bindings.NEXT) and self.selectedIdx < #self.items-1 then
         self.selectedIdx = self.selectedIdx+1
         needRefresh = true        
-    elseif ch == 'k' and self.selectedIdx > 0 then
+    elseif ckBinding(ch, bindings.PREV) and self.selectedIdx > 0 then
         self.selectedIdx = self.selectedIdx-1
         needRefresh = true
     else
@@ -257,6 +270,7 @@ end
 -- ---- --
 print("initing curses...")
 curses.initscr()
+curses.raw(true)
 curses.echo(false)  -- not noecho !
 curses.nl(false)    -- not nonl !
 curses.halfdelay(5)
@@ -274,19 +288,20 @@ COLOR_FOLLOWTARGET = 5
 curses.init_pair(COLOR_FOLLOWTARGET, curses.COLOR_WHITE, curses.COLOR_RED) 
 stdscr = curses.stdscr()  -- it's a userdatum
 stdscr:clear()
+stdscr:keypad(true)
 --stdscr:mvaddstr(15,20,'print out curses table (y/n) ? ')
 
 bindings = {}
-bindings.PREV = "k" --..string.char(curses.KEY_UP)
-bindings.NEXT = "j" --..string.char(curses.KEY_DONW)
-bindings.DELETE ="d"
-bindings.DONE = "x"
-bindings.PROCRASTINATE = "p"
-bindings.FOLLOW = "f"
-bindings.ADD = "a"
-bindings.DUE = "b"
-bindings.EDIT = "e"
-bindings.REREAD = "r"
+bindings.PREV = {"k", curses.KEY_UP}
+bindings.NEXT = {"j", curses.KEY_DOWN}
+bindings.DELETE = {"d"}
+bindings.DONE = {"x"}
+bindings.PROCRASTINATE = {"p"}
+bindings.FOLLOW = {"f"}
+bindings.ADD = {"a"}
+bindings.DUE = {"b"}
+bindings.EDIT = {"e"}
+bindings.REREAD = {"r"}
 
 
 ftLetters = "qwertyuiopasdfghjklzxcvbnm0123456789QWERTYUIOPASDFGHJKLZXCVBNM"
@@ -300,7 +315,7 @@ local handler = nil
 
 theList.selectedIdx = 0
 
-while ch ~= 'q' do
+while not ckBinding(ch, {"q"}) do
     redraw()
 
     ch = getKey()
