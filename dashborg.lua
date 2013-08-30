@@ -156,6 +156,15 @@ function getKey(allowReread)
     return c
 end
 
+function getChar(allowReread)
+    local c = nil
+    while c == nil or c>255 do
+        c = getKey(allowReread)
+    end
+
+    return string.char(c)
+end
+
 -- List class --
 -- ---------- --
 
@@ -378,7 +387,7 @@ while not ckBinding(ch, {"q"}) do
         end
         curses.attrset(0)
         stdscr:refresh()
-        local ft = letterMap[getKey()]
+        local ft = letterMap[getChar()]
         if ft then ft.cb() end
         needRefresh = true
     elseif ckBinding(bubble, bindings.REREAD)  then
