@@ -74,7 +74,9 @@ function reread()
     local tasks = {}
 --    for k,v in pairs(cjson.decode('['..execTask('status.not:deleted', 'status.not:completed', 'status.not:waiting', 'export')..']')) do
     local ids = trim(execTask("ids"))
-    for k,v in pairs(cjson.decode('['..execTask(ids, "status.not:waiting", "export")..']')) do
+    local demoted = "-demoted"
+    -- ARGH if #ids < 5 then demoted = "" end
+    for k,v in pairs(cjson.decode('['..execTask(ids, demoted, "status.not:waiting", "export")..']')) do
         tasks[k] = Task:new(v)        
     end
     return tasks
@@ -302,7 +304,7 @@ stdscr:keypad(true)
 bindings = {}
 bindings.PREV = {"k", curses.KEY_UP}
 bindings.NEXT = {"j", curses.KEY_DOWN}
-bindings.DELETE = {"d"}
+bindings.DELETE = {"D"}
 bindings.DONE = {"x"}
 bindings.PROCRASTINATE = {"p"}
 bindings.FOLLOW = {"f"}
@@ -310,7 +312,7 @@ bindings.ADD = {"a"}
 bindings.DUE = {"b"}
 bindings.EDIT = {"e"}
 bindings.REREAD = {"r"}
-
+bindings.DEMOTE = {"d"}
 
 ftLetters = "qwertyuiopasdfghjklzxcvbnm0123456789QWERTYUIOPASDFGHJKLZXCVBNM"
 
@@ -393,6 +395,11 @@ while not ckBinding(ch, {"q"}) do
     elseif ckBinding(bubble, bindings.REREAD)  then
         theList.items = reread()
         feedback("Reloaded task list.")
+        needRefresh = true
+    elseif ckBinding(bubble, bindings.DEMOTE) then
+        local res = execTask(item.uuid, "modify", "+demoted")
+        feedback("'"..item.description .. "' demoted", res)
+        theList.items = reread()
         needRefresh = true
     end
 
