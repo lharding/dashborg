@@ -404,17 +404,3 @@ while not ckBinding(ch, {"q"}) do
     end
 
 end
-
-if c and c < 256 then c = string.char(c) end
-curses.endwin()
-if c == 'y' then
-    local a = {};  for k in pairs(curses) do a[#a+1]=k end
-    table.sort(a)
-    for i,k in ipairs(a) do print(type(curses[k])..'  '..k) end
-end
-
-dump(curses.color_pair(1))
-
-reread()
-
-print(dump(tasks))
