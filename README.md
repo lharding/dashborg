@@ -1,3 +1,7 @@
+# END-OF-THE-WORLD NOTICE
+
+As of this commit I've replaced this project in my own use with [tasknc](https://github.com/mjheagle8/tasknc). It's not likely there will be any further development here, but I'm leaving the repository up for posterity.
+
 # HERE BE DRAGONS
 
 This is dashborg, a PIM-dashboard tool I'm working on that uses taskwarrior as a task management backend. It's a bit barely functional at all right now and this repo mainly exists to ease my process of syncing development between different machines.
