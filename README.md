@@ -11,7 +11,7 @@ This is dashborg, a PIM-dashboard tool I'm working on that uses taskwarrior as a
 - Explicit alerts for due or soon-to-be-due tasks
 - More succint time-delta format (right now just using taskwarrior's) [ABANDONED: taskwarrior's has improved]
 - Pull upcoming events from google calendar and display in their own section
-- notes section for non-task things [ABANDONDED: now using `rclip` from [`lsh-bin`](/lharding/lsh-bin) for this]
+- notes section for non-task things [ABANDONDED: now using `rclip` from [`lsh-bin`](https://github.com/lharding/lsh-bin) for this]
 - "quick alarm" kitchen timer function
 
 ## WTF?
