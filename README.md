@@ -1,6 +1,6 @@
 # END-OF-THE-WORLD NOTICE
 
-As of this commit I've replaced this project in my own use with [tasknc](https://github.com/mjheagle8/tasknc). It's not likely there will be any further development here, but I'm leaving the repository up for posterity.
+As of this commit I've replaced this project in my own use with [tasknc](https://github.com/lharding/tasknc). It's not likely there will be any further development here, but I'm leaving the repository up for posterity.
 
 # HERE BE DRAGONS
 
@@ -9,9 +9,9 @@ This is dashborg, a PIM-dashboard tool I'm working on that uses taskwarrior as a
 ## Roadmap
 
 - Explicit alerts for due or soon-to-be-due tasks
-- More succint time-delta format (right now just using taskwarrior's)
+- More succint time-delta format (right now just using taskwarrior's) [ABANDONED: taskwarrior's has improved]
 - Pull upcoming events from google calendar and display in their own section
-- notes section for non-task things
+- notes section for non-task things [ABANDONDED: now using `rclip` from [`lsh-bin`](/lharding/lsh-bin) for this]
 - "quick alarm" kitchen timer function
 
 ## WTF?
